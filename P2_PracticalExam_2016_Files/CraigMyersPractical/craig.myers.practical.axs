@@ -168,7 +168,9 @@ volatile integer nCDButtons[]=
     4,5
 };
 //volatile integer Array1[6]; //This doesn't work with the emulator
-volatile char Array1[6][8];
+//volatile char Array1[6][8];
+volatile integer Array1[6];
+
 
 //Timeline helpers
 constant long TL_PROJ_WARM_COUNT	=	1
@@ -667,7 +669,8 @@ timeline_create(tl_LAMPHOURS,lLampHoursTime,length_array(lLampHoursTime),timelin
 
 
 //Modules go last
-define_module 'Sony_EVID100_Comm_dr1_0_0' COMM_CAM_1 (vdvCAM, dvCAM);
+//define_module 'Sony_EVID100_Comm_dr1_0_0' COMM_CAM_1 (vdvCAM, dvCAM);
+define_module 'Sony_EVID100_Comm_dr1_0_0' mCamDev1(vdvCam, dvCam)
 
 (***********************************************************)
 (*                THE EVENTS GO BELOW                      *)
@@ -714,8 +717,8 @@ data_event[vdvCAM]
 {
     online:
     {
-	send_command dvDVD,"'SET BAUD 9600,N,8,1'";
-	send_command dvDVD,"'HSOFF'";
+	send_command vdvCAM,"'SET BAUD 9600,N,8,1'";
+	send_command vdvCAM,"'HSOFF'";
     }
 }
 
@@ -730,19 +733,28 @@ data_event[dvIR1]
 	//Create an integer array and assign 6 TV station nymbers during the ONLINE event for this device.
 	send_command dvIR1,"'XCHM-1'";
 	
-	//Array1[1] = 1;
-	//Array1[2] = 2;
-	//Array1[3] = 3;
-	//Array1[4] = 4;
-	//Array1[5] = 5;
-	//Array1[6] = 10;
 	
-	Array1[1] = "'XCH-1'";
-	Array1[2] = "'XCH-2'";
-	Array1[3] = "'XCH-3'";
-	Array1[4] = "'XCH-4'";
-	Array1[5] = "'XCH-5'";
-	Array1[6] = "'XCH-10'"; //Try changing these to send strings. 
+	//example
+	//IntegerNum[ ] = {1, 2, 3, 4, 5}
+	
+	
+	
+
+	//Array1[] = {10, 200, 33, 1, 14, 12};
+	
+	Array1[1] = 10;
+	Array1[2] = 200;
+	Array1[3] = 33;
+	Array1[4] = 1;
+	Array1[5] = 14;
+	Array1[6] = 12;
+	
+	//Array1[1] = "'XCH-1'";
+	//Array1[2] = "'XCH-2'";
+	//Array1[3] = "'XCH-3'";
+	//Array1[4] = "'XCH-4'";
+	//Array1[5] = "'XCH-5'";
+	//Array1[6] = "'XCH-10'"; //Try changing these to send strings. 
     }
 }
 
@@ -1023,16 +1035,13 @@ button_event[dvTP_CAM,0]
 	switch(button.input.channel)
 	{
 	    case 132:	//Up
-	    {
-	    
-	    }
 	    case 133:	//Down
-	    case 134:	//Right
-	    case 135:	//Left
+	    case 134:	//Left
+	    case 135:	//Right
 	    case 158:	//Zoom +
 	    case 159:	//Zoom -
 	    {
-	    
+		    ON[vdvCAM,button.input.channel]
 	    }
 	    case 3016:	//Focus
 	    {
@@ -1120,8 +1129,8 @@ button_event[dvTP_SAT,0]
 	    {
 		local_var integer cPreset;
 		cPreset = button.input.channel - 1040
-		//send_command dvIR1,"'XCH-',Array1[cPreset]"; // This doesn't work with the emulator
-		send_command dvIR1,Array1[cPreset]
+		send_command dvIR1,"'XCH-',ITOA(Array1[cPreset])"; // This doesn't work with the emulator -- Fixed with ITOA
+		//send_command dvIR1,Array1[cPreset]
 		to[dvTP_SAT,button.input.channel]
 	    }
 	    default:
