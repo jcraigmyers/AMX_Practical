@@ -41,7 +41,7 @@ dvRelays		= 5001:8:0;	// Screen Relays & Rack Power
 //dvIR1			= 5001:9:0;	// DirecTV HR-20
 
 //IP Devices
-//dvLIGHTS		=
+dvLIGHTS		= 0:4:0;
 
 //NXD-700VI
 dvTP			= 10001:1:0;	// NXD-700VI
@@ -95,6 +95,15 @@ DEFINE_TYPE
 (*               VARIABLE DEFINITIONS GO BELOW             *)
 (***********************************************************)
 DEFINE_VARIABLE
+
+
+//IP stuff
+VOLATILE INTEGER LocalPort		//Integer
+VOLATILE CHAR IPAddress		//String
+VOLATILE LONG IPPort		//Long
+VOLATILE INTEGER nProtocol	//Integer
+
+
 
 //volatile integer nSource; Don't need this now
 volatile integer nActiveSource;
@@ -602,12 +611,82 @@ define_function fnStartPollingDVD()
 
 
 
+// FILE OPERATIONS
+//
+//
+DEFINE_FUNCTION readStuffFromFile(CHAR cFileName[])
+
+{
+   STACK_VAR SLONG slFileHandle     // stores the tag that represents the file (or and error code)
+   LOCAL_VAR SLONG slResult         // stores the number of bytes read (or an error code)
+   STACK_VAR CHAR  oneline[2000]    // a buffer for reading one line.  Must be as big or bigger than the biggest line
+   STACK_VAR INTEGER INC
+
+   slFileHandle = FILE_OPEN('IP_ADDRESSING.txt',FILE_READ_ONLY) // OPEN FILE FROM THE BEGINNING
+
+   IF(slFileHandle>0)               // A POSITIVE NUMBER IS RETURNED IF SUCCESSFUL
+    {
+
+    slResult = 1               // seed with a good number so the loop runs at least once
+
+	WHILE(slResult>0)
+	{
+            slResult = FILE_READ_LINE(slFileHandle,oneline,MAX_LENGTH_STRING(oneline)) // grab one line from the file
+            parseLineFromFile(oneline) //sends line to parse function
+	}
+    FILE_CLOSE(slFileHandle)   // CLOSE THE LOG FILE
+    }           
+
+    ELSE
+    {
+    SEND_STRING 0,"'FILE OPEN ERROR:',ITOA(slFileHandle)"  // IF THE LOG FILE COULD NOT BE CREATED
+    }
+
+}
+
+DEFINE_FUNCTION parseLineFromFile(CHAR aLine[2000]) //gets line here
+
+{
+
+    LOCAL_VAR CHAR Protocol // Need to compare... IF TCP = 1 UDP = 2 UDP with Receive = 3
+    LOCAL_VAR CHAR cPos1 // Position of the first comma
+    LOCAL_VAR CHAR cPos2 // Position of the second comma
+    LOCAL_VAR CHAR cPos3 // Position of the third comma
+    /// normal string parsing here...
+    cPos1 = FIND_STRING(aLine,',',1) //Find the first comma in aLine starting at beginning. 
+    cPos2 = FIND_STRING(aline,',',cPos1) //Find the next comma in sequence starting at position 1.
+    cPos3 = FIND_STRING(aLine,',',cPos2) //Find the next comma in sequence starting at position 2. 
+    
+    LocalPort 	= type_cast(LEFT_STRING(aLine,cPos1-1)); //Grabs everything left of cPos1
+    IPAddress 	= type_cast(mid_string(aLine,cPos1,cPos2-cPos1)); 
+    IPPort 	= type_cast(mid_string(aLine,cPos2,cPos3-cPos2)); //Should grab string x in length starting at cPos1.
+    Protocol 	= type_cast(right_string(aLine,3)); //grabs what's left over. 
+    IF (Protocol == 'tcp')
+    {
+	nProtocol = 1;
+    }
+    ELSE IF (Protocol == 'udp')
+    {
+	nProtocol = 2;
+    }
+    ELSE
+    {
+	nProtocol = 3;
+    }
+    send_command dvTP_LIGHT,"'^TXT-11,0,LocalPort',LocalPort";
+    send_command dvTP_LIGHT,"'^TXT-12,0,IPAddress',IPAddress";
+    send_command dvTP_LIGHT,"'^TXT-13,0,IPPort',IPPort";
+    send_command dvTP_LIGHT,"'^TXT-14,0,nProtocol',nProtocol";
+}
+
+
 
 
 
 
 
 #include 'SNAPI.axi';
+//#include 'IP_ADDRESSING.txt';
 
 (***********************************************************)
 (*                STARTUP CODE GOES BELOW                  *)
@@ -681,6 +760,15 @@ DEFINE_EVENT
 //
 //
 //
+data_event[dvMaster]
+{
+    online:
+    {
+	IP_CLIENT_OPEN(LocalPort,IPAddress,IPPort,nProtocol);
+    }
+}
+
+
 data_event[dvVPJ1]
 {
     online:
@@ -789,6 +877,8 @@ data_event[dvSWT1]
     }
     
 }
+
+
 
 
 
