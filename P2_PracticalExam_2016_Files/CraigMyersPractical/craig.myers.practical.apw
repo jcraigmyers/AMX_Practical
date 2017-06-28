@@ -148,6 +148,10 @@
 <FilePathName>_MODULE\Sony_EVID100_v1_0_3_dr1_0_0\Sony_EVID100_Comm_dr1_0_0.jar</FilePathName>
 <Comments></Comments>
 </File>
+<File CompileType="Netlinx" Type="DUET"><Identifier>VirtualKeypad_dr1_0_0</Identifier>
+<FilePathName>_MODULE\VirtualKeypad_2_0_1\VirtualKeypad_dr1_0_0.jar</FilePathName>
+<Comments></Comments>
+</File>
 <File CompileType="Netlinx" Type="Other"><Identifier>connectorDetail_2.2</Identifier>
 <FilePathName>_OTHER\connectorDetail_2.2.bmp</FilePathName>
 <Comments></Comments>
@@ -203,6 +207,11 @@
 </File>
 <File CompileType="Netlinx" Type="Other"><Identifier>IP_ADDRESSING</Identifier>
 <FilePathName>IP_ADDRESSING.txt</FilePathName>
+<Comments></Comments>
+<MasterDirectory>\</MasterDirectory>
+</File>
+<File CompileType="Netlinx" Type="Other"><Identifier>MAC_ADDRESSING</Identifier>
+<FilePathName>MAC_ADDRESSING.txt</FilePathName>
 <Comments></Comments>
 <MasterDirectory>\</MasterDirectory>
 </File>
