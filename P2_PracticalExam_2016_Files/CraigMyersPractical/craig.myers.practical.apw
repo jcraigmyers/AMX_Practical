@@ -172,10 +172,6 @@
 <Comments></Comments>
 <MasterDirectory>\</MasterDirectory>
 </File>
-<File CompileType="Netlinx" Type="DUET"><Identifier>NetLinxPracticalExamEmulator_rev1</Identifier>
-<FilePathName>_OTHER\NetLinxPracticalExamEmulator_rev1.jar</FilePathName>
-<Comments></Comments>
-</File>
 <File CompileType="Netlinx" Type="Other"><Identifier>readme</Identifier>
 <FilePathName>_OTHER\readme.txt</FilePathName>
 <Comments></Comments>

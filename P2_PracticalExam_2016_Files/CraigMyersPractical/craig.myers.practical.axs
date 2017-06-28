@@ -22,46 +22,87 @@ PROGRAM_NAME='craig.myers.practical'
 DEFINE_DEVICE
 
 //NI-3101-SIG
-dvMaster		= 0:1:0;		// Master
+dvMaster		=	0:1:0;		// Master
 //232 Devices
-//dvSWT1			= 5001:1:0;	// Switchback 12x1
-//dvVPJ1			= 5001:2:0;	// LightThrower 3000
-//dvDVD			= 5001:3:0;	// Disco Tech
-dvCAM			= 5001:4:0;	// Sony EVID100
+//dvSWT1		=	5001:1:0;	// Switchback 12x1
+//dvVPJ1		=	5001:2:0;	// LightThrower 3000
+//dvDVD			=	5001:3:0;	// Disco Tech
+dvCAM			=	5001:4:0;	// Sony EVID100
 
 //Emulator Devices
-dvSWT1			= 8001:1:0;	// Switchback 12x1
-dvVPJ1			= 8002:1:0;	// LightThrower 3000
-dvDVD			= 8003:1:0;	// Disco Tech
-dvIR1			= 8005:1:0;	// DirecTV HR-20
+dvSWT1			=	8001:1:0;	// Switchback 12x1
+dvVPJ1			=	8002:1:0;	// LightThrower 3000
+dvDVD			=	8003:1:0;	// Disco Tech
+dvIR1			=	8005:1:0;	// DirecTV HR-20
 //Relay Devices
-dvRelays		= 5001:8:0;	// Screen Relays & Rack Power
+dvRelays		=	5001:8:0;	// Screen Relays & Rack Power
 
 //IR Devices
-//dvIR1			= 5001:9:0;	// DirecTV HR-20
+//dvIR1			= 	5001:9:0;	// DirecTV HR-20
 
 //IP Devices
-dvLIGHTS		= 0:4:0;
+dvLIGHTS		=	0:4:0;
 
 //NXD-700VI
-dvTP			= 10001:1:0;	// NXD-700VI
+dvTP			=	10001:1:0;	// NXD-700VI
 
-dvTP_CAM		= 10001:10:0;	// Camera Buttons
-dvTP_DVD		= 10001:11:0;	// DVD/CD Buttons
-dvTP_LIGHT		= 10001:12:0;	// Lighting Control
-dvTP_ROOM		= 10001:13:0;	// Room Control
+dvTP_CAM		=	10001:10:0;	// Camera Buttons
+dvTP_DVD		=	10001:11:0;	// DVD/CD Buttons
+dvTP_LIGHT		=	10001:12:0;	// Lighting Control
+dvTP_ROOM		=	10001:13:0;	// Room Control
 //dvTP_ROOM is handled by dvTP 
-dvTP_SAT		= 10001:14:0;	// Sat Buttons
-dvTP_SEC		= 10001:15:0;	// Security Camera Buttons
+dvTP_SAT		=	10001:14:0;	// Sat Buttons
+dvTP_SEC		=	10001:15:0;	// Security Camera Buttons
 
 
 //Virtual Devices
-vdvCAM			= 41001:1:0	// Sony EVID100 Module
+vdvCAM			=	41001:1:0	//	Sony EVID100 Module
+//vdvKEYPAD		=	42001:1:0	//	Virtual Keypad
+//dvKEYPAD		=	0:3:0	//	Virtual Keypad
+VIRTUALKEYPAD		=	42001:1:0	//	Virtual Keypad
+dvVIRTUALKEYPAD		=	0:3:0	//	Virtual Keypad
 
 (***********************************************************)
 (*               CONSTANT DEFINITIONS GO BELOW             *)
 (***********************************************************)
 DEFINE_CONSTANT
+
+    LIGHTING_IP_ADDRESS = '10.0.0.26'
+    LIGHTING_PORT	= 24
+//Virtual Keypad Button Labels
+BUTTON1		=	'1'
+BUTTON2 	=	'2'
+BUTTON3		=	'3'
+BUTTON4		=	'4'
+BUTTON5		=	'DVD/CD'
+BUTTON6		=	'Camera'
+BUTTON7		=	'Sat. Rcvr.'
+BUTTON8		=	'Security Camera'
+BUTTON9		=	'5'
+BUTTON10	=	'6'
+BUTTON11	=	'7'
+BUTTON12	=	'System Power'
+
+
+
+//Virtual Keypad Button Numbers
+integer	BTNS[]	=
+{
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+}
+
+
 
 long tl_FEEDBACK	=7;
 long tl_COUNT		=8;
@@ -91,14 +132,36 @@ VIDEO			=	4;
 (***********************************************************)
 DEFINE_TYPE
 
+STRUCTURE LIGHTS
+{
+    INTEGER lightIntensity
+    INTEGER fadeTime
+}
+STRUCTURE SCENES
+{
+    CHAR sceneName[7]
+    LIGHTS instancedLights[4]
+}
 (***********************************************************)
 (*               VARIABLE DEFINITIONS GO BELOW             *)
 (***********************************************************)
 DEFINE_VARIABLE
 
 
+//Lighting
+
+NON_VOLATILE SCENES instancedScenes[3]
+VOLATILE INTEGER SceneFeedback
+
+//File parsing stuff
+VOLATILE CHAR Protocol // Need to compare... IF TCP = 1 UDP = 2 UDP with Receive = 3
+VOLATILE integer cPos1 // Position of the first comma
+VOLATILE integer cPos2 // Position of the second comma
+VOLATILE integer cPos3 // Position of the third comma
+
 //IP stuff
-VOLATILE INTEGER LocalPort		//Integer
+VOLATILE INTEGER nLocalPort		//Integer
+VOLATILE INTEGER LocalPort
 VOLATILE CHAR IPAddress		//String
 VOLATILE LONG IPPort		//Long
 VOLATILE INTEGER nProtocol	//Integer
@@ -176,6 +239,38 @@ volatile integer nCDButtons[]=
 {
     4,5
 };
+
+
+//Lighting Arrays
+volatile integer nRaiseDimButtons[]=
+{
+    35,37,39,41
+};
+
+volatile integer nLowerDimButtons[]=
+{
+    36,38,40,42
+};
+
+volatile integer nSceneButtons[]=
+{
+    30,31,32
+};
+
+volatile integer nLevelArray[] = 
+{
+    10,11,12,13
+};
+
+volatile integer nPresetButtons[]=
+{
+    261,262,263
+};
+
+
+
+
+
 //volatile integer Array1[6]; //This doesn't work with the emulator
 //volatile char Array1[6][8];
 volatile integer Array1[6];
@@ -202,6 +297,10 @@ volatile integer nVideoSwitcherButton[]=
 volatile integer nSelectedInput;	
 volatile integer nSelectedOutput;
 
+
+volatile integer nFlag;
+volatile char sFromTP[100];
+volatile CHAR sToSend[1024]
 
 (***********************************************************)
 (*               LATCHING DEFINITIONS GO BELOW             *)
@@ -271,9 +370,15 @@ define_function fnSendToProj2() // Sends Projector commands based on what was re
 //To call this function and to retrieve the RETURN value, use the following syntax:
 
 //Checksum = fnCalculateChecksum()
-
-
-
+define_function fnParseLights(char sToParse[12])
+{
+	local_var integer nZone
+	local_var integer nLevel
+	
+	nZone = ATOI(mid_string(sToParse,7,1));	//Get Zone
+	nLevel = ATOI(mid_string(sToParse,10,3));	//Get Level
+	send_level dvTP_LIGHT, nLevelArray[nZone],(nLevel * 2.55);
+}
 //GETS STRINGS FROM PROJECTOR AND ACTS ACCORDINGLY
 define_function fnParseProj(char sToParse[9]) // This gets all strings from the projector & handles feedback appropriately // 9 is length of longest string returned
 {
@@ -466,6 +571,7 @@ define_function fnShutdownMacro()
 
 define_function fnShutdown()
 {
+    
     send_command dvTP,'@PPN-Confirm'
     
     
@@ -543,7 +649,7 @@ define_function fnCheckPowerStatus()
 	}
 	else
 	{
-	    fnShutdown()	//need to figure out how to handle the power macro. Basically, any time the power macro is called, it opens the popup page -- the power macro is called every input change.
+	   // fnShutdown()	//need to figure out how to handle the power macro. Basically, any time the power macro is called, it opens the popup page -- the power macro is called every input change.
 	}
 }
 
@@ -555,6 +661,63 @@ define_function fnCheckPowerStatus()
 //Lighting Functions
 //
 //
+DEFINE_FUNCTION fnOpenTCPConnect(DEV dvIP, CHAR IP4_ADDRESS[15], LONG IP_PORT) //do nothing is device is communicating. reconnect if not
+{
+    IF(![dvIP, 251])
+    {
+	IP_CLIENT_OPEN (dvIP.PORT, IP4_ADDRESS, IP_PORT, IP_TCP)
+    }
+}
+define_function	fnInitializeLightConnection()
+{
+    //IP_CLIENT_OPEN(4,IPAddress,IPPort,nProtocol);
+    //IP_CLIENT_OPEN(4,10.0.0.26,24,1);
+(*
+    IF	(dvLIGHTS == LocalPort) //IP_ADDRESSING must match dvLights
+    {
+	
+	
+    }*)
+}
+
+define_function	fnInitializeLightArray()
+{
+    instancedScenes[1].sceneName = 'Scene 1'
+    instancedScenes[1].instancedLights[1].lightIntensity	=	10
+    instancedScenes[1].instancedLights[1].fadeTime		=	1
+    instancedScenes[1].instancedLights[2].lightIntensity	=	20
+    instancedScenes[1].instancedLights[2].fadeTime		=	1
+    instancedScenes[1].instancedLights[3].lightIntensity	=	30
+    instancedScenes[1].instancedLights[3].fadeTime		=	1
+    instancedScenes[1].instancedLights[4].lightIntensity	=	40
+    instancedScenes[1].instancedLights[4].fadeTime		=	1
+    instancedScenes[2].sceneName = 'Scene 2'			
+    instancedScenes[2].instancedLights[1].lightIntensity	=	80
+    instancedScenes[2].instancedLights[1].fadeTime		=	3
+    instancedScenes[2].instancedLights[2].lightIntensity	=	90
+    instancedScenes[2].instancedLights[2].fadeTime		=	3
+    instancedScenes[2].instancedLights[3].lightIntensity	=	99
+    instancedScenes[2].instancedLights[3].fadeTime		=	3
+    instancedScenes[2].instancedLights[4].lightIntensity	=	60
+    instancedScenes[2].instancedLights[4].fadeTime		=	3
+    instancedScenes[3].sceneName = 'Scene 3'
+    instancedScenes[3].instancedLights[1].lightIntensity	=	0
+    instancedScenes[3].instancedLights[1].fadeTime		=	1
+    instancedScenes[3].instancedLights[2].lightIntensity	=	0
+    instancedScenes[3].instancedLights[2].fadeTime		=	1
+    instancedScenes[3].instancedLights[3].lightIntensity	=	0
+    instancedScenes[3].instancedLights[3].fadeTime		=	1
+    instancedScenes[3].instancedLights[4].lightIntensity	=	0
+    instancedScenes[3].instancedLights[4].fadeTime		=	1
+}
+
+//FADEDIM, INTENSITY, FADE TIME, DELAY TIME, ADDRESS
+
+
+
+
+
+//IP_CLIENT_OPEN(LocalPort,IPAddress,IPPort,Protocol)
 
 //Timelines
 //
@@ -614,6 +777,217 @@ define_function fnStartPollingDVD()
 // FILE OPERATIONS
 //
 //
+DEFINE_FUNCTION fnQueryTP()
+{
+    SEND_COMMAND dvTP,"'?MAC'"
+}
+
+//WRITE TO FILE
+
+DEFINE_FUNCTION appendToFile (CHAR cFileName[],CHAR cLogString[])
+
+{
+
+   STACK_VAR SLONG slFileHandle1     // stores the tag that represents the file (or and error code)
+
+   LOCAL_VAR SLONG slResult1         // stores the number of bytes written (or an error code)
+
+   slFileHandle1 = FILE_OPEN(cFileName,FILE_RW_APPEND) // OPEN OLD FILE (OR CREATE NEW ONE)    
+
+   IF(slFileHandle1>0)               // A POSITIVE NUMBER IS RETURNED IF SUCCESSFUL
+
+         {
+
+         slResult1 = FILE_WRITE_LINE(slFileHandle1,cLogString,LENGTH_STRING(cLogString)) // WRITE THE NEW INFO
+
+          FILE_CLOSE(slFileHandle1)   // CLOSE THE LOG FILE
+
+         }           
+
+      ELSE
+
+         {
+
+         SEND_STRING 0,"'FILE OPEN ERROR:',ITOA(slFileHandle1)" // IF THE LOG FILE COULD NOT BE CREATED
+
+         }
+
+}
+
+
+
+
+//READ FROM FILE
+
+DEFINE_FUNCTION fnReadFromFile()
+{
+    STACK_VAR SLONG hFile
+    LOCAL_VAR SLONG slBytesRead
+    STACK_VAR CHAR Buffer[1024]	//Stack var only works within this function
+    stack_var CHAR PrintBuffer
+    stack_var CHAR ptBuff
+    local_var INTEGER lBuff 
+    local_var INTEGER lpos1
+    
+    //I guess this has to go up here
+    local_var char cIPdevice
+    CHAR StrExp[30]
+    local_var integer POS     
+    
+    SLONG slReturn
+    CHAR Decode 
+    
+    hFile = FILE_OPEN('IP_ADDRESSING.txt',FILE_READ_ONLY)
+    IF(hFile>0)
+    {
+    lpos1 = 79				//Start reading file here
+    FILE_SEEK (hFile, lpos1)
+    slBytesRead = 1
+	WHILE(slBytesRead>0)
+	{
+	send_command dvTP_LIGHT,"'^TXT-11,0,',ITOA(slBytesRead)";
+	slBytesRead = FILE_READ(hFile,Buffer,1024)
+	    (*WHILE(ITOA(slBytesRead)!='-9')
+	    {
+		lBuff++
+		lpos1 = lBuff
+	    }*)
+	//send_command dvTP_LIGHT,"'^TXT-11,0,',ITOA(slBytesRead)";
+	//normal string parsing here
+	
+	
+	}
+    FILE_CLOSE(hFile)
+    }
+
+    //send_command dvTP_LIGHT,"'^TXT-11,0,',ITOA(slBytesRead)";
+    //PrintBuffer = get_buffer_string(Buffer[1024],10)
+    //PrintBuffer = get_buffer_char(Buffer[1024])
+    //ptBuff = find_string(Buffer,'IP Device',1)
+    //Examples below
+    //SINTEGER STRING_TO_VARIABLE (DECODE, CHAR BUFFER[ ], LONG POSITION
+    //slReturn = STRING_TO_VARIABLE(MyAlbumStruct, sBinaryString, slPos)
+    // slReturn = STRING_TO_VARIABLE(Decode, Buffer[1024],1)
+
+    //slReturn = VARIABLE_TO_STRING(Buffer, sBinaryString, 1)
+   (* WHILE(Buffer[lBuff]!=',')
+    {
+	lBuff++
+	lpos1 = lBuff
+	
+    }*)
+    
+    
+    //Buffer is just a char array. Strings are char arrays. Let's try some string keywords on the buffer.
+    
+    
+
+    
+    
+    //Borrowing string parsing function for switcher
+    //Don't forget to comment this out
+    (*
+    
+     string: 				// String Handler -- handles feedback from switcher
+    {
+	local_var char sFromSWT1[9];
+	local_var char cInput[2];
+	local_var char cOutput[1];
+	//local_var char cStatusByte[1];
+	//local_var char cInputByte[1];
+	sFromSWT1 = data.text;
+	//cInput = REMOVE_STRING(sFromSWT1,'IN',1)
+	cInput = type_cast(mid_string(sFromSWT1,7,LENGTH_STRING(sFromSWT1) - 7)); // mid_string(Input char string, starting location in the string, number of characters to extract)
+	cOutput = type_cast(mid_string(sFromSWT1,4,1));
+	send_command dvTP_SEC,"'^TXT-11,0,OUT',cOutput";
+	send_command dvTP_SEC,"'^TXT-12,0,',sFromSWT1";
+	send_command dvTP_SEC,"'^TXT-13,0,IN',cInput";
+	//cInput = type_cast(LEFT_STRING(cButtonString,LENGTH_STRING(cButtonString) - 1)
+	
+	//fnParseSWT1(sFromSWT1); //sends string to parse function
+	
+	    //to[dvTP,button.input.channel]
+
+
+    }
+    *)
+    //end
+    
+    
+    
+    
+    
+    
+    
+    
+    //Fuck it let's try this
+    //CHAR BufferString[2]
+    //BufferString = "Buffer[1],Buffer[2]"
+    //decode = Buffer[1].Buffer[2].Buffer[3];
+    //send_command dvTP_LIGHT,"'^TXT-10,0,',Buffer[lBuff],Buffer[lbuff+1]";
+    //send_command dvTP_LIGHT,"'^TXT-12,0,',Buffer[1],Buffer[2],Buffer[3],Buffer[4],Buffer[5],Buffer[6],Buffer[7],Buffer[8],Buffer[9],Buffer[10],Buffer[11]";//This is the only thing that works right now. Need to figure out how to search the array
+    //send_command dvTP_LIGHT,"'^TXT-13,0,',PrintBuffer";
+    //34 bytes
+    StrExp = "Buffer[1],Buffer[2],Buffer[3],Buffer[4],Buffer[5],Buffer[6],Buffer[7],Buffer[8],Buffer[9],Buffer[10],Buffer[11],Buffer[12],Buffer[13],Buffer[14],Buffer[15],Buffer[16],Buffer[17],Buffer[18],Buffer[19],Buffer[20],Buffer[21],Buffer[22],Buffer[23],Buffer[24],Buffer[25],Buffer[26],Buffer[27],Buffer[28],Buffer[29],Buffer[30]" //Hey, if it works...
+    cIPdevice = type_cast(mid_string(StrExp,5,5)); // mid_string(Input char string, starting location in the string, number of characters to extract)
+    
+    POS = FIND_STRING(StrExp,',',1)
+    
+    //send_command dvTP_LIGHT,"'^TXT-14,0,',ITOA(POS)";
+   
+    
+    
+        /// normal string parsing here...
+    cPos1 = FIND_STRING(StrExp,',',1) //Find the first comma in aLine starting at beginning. 
+    cPos2 = FIND_STRING(StrExp,',',cPos1+1) //Find the next comma in sequence starting at position 1.
+    cPos3 = FIND_STRING(StrExp,',',cPos2+1) //Find the next comma in sequence starting at position 2. 
+    
+    LocalPort 	= type_cast(LEFT_STRING(StrExp,cPos1-1)); //Grabs everything left of cPos1
+    //nLocalPort = ATOI(LocalPort)
+    //LocalPort 	= type_cast(LEFT_STRING(StrExp,5)); //Might have to convert sPos1 to a long, but first let's test setting the count to 5
+    IPAddress 	= type_cast(mid_string(StrExp,cPos1+1,cPos2-cPos1)); 
+    IPPort 	= type_cast(mid_string(StrExp,cPos2+1,cPos3-cPos2)); //Should grab string x in length starting at cPos1.
+    Protocol 	= type_cast(mid_string(StrExp,cPos3+1,3)); //grabs what's left over. 
+    IF (Protocol == 'tcp')
+    {
+	nProtocol = 1;
+    }
+    ELSE IF (Protocol == 'udp')
+    { 
+	nProtocol = 2;
+    }
+    ELSE
+    {
+	nProtocol = 3;
+    }
+    (*
+    send_command dvTP_LIGHT,"'^TXT-11,0,',LocalPort";
+    
+    send_command dvTP_LIGHT,"'^TXT-12,0,',IPAddress";
+    //send_command dvTP_LIGHT,"'^TXT-12,0,IPAddress',IPAddress";
+    send_command dvTP_LIGHT,"'^TXT-13,0,',IPPort";
+    //send_command dvTP_LIGHT,"'^TXT-13,0,IPPort',IPPort";
+    send_command dvTP_LIGHT,"'^TXT-14,0,',ITOA(nProtocol)";
+    
+    //TEST TO SEE IF FILE IS BEING READ AND PARSED CORRECTLY
+    IF (localport == '0:4:0' && IPAddress == '10.0.0.26' && IPPort == '24' && Protocol == 'tcp')
+	{
+	    send_command dvTP_LIGHT,"'^TXT-10,0,SUCCESS'"
+	}
+    ELSE
+	{
+	    send_command dvTP_LIGHT,"'^TXT-10,0,FAIL'"
+	}*)
+    //send_command dvTP_LIGHT,"'^TXT-10,0,',cIPdevice,',',ITOA(cPos1),',',ITOA(cPos2),',',ITOA(cPos3),',',ITOA(POS),',',Protocol";
+    
+    
+    
+    //send_command dvTP_LIGHT,"'^TXT-12,0,',Buffer[]";
+    
+}
+
+(*
+
 DEFINE_FUNCTION readStuffFromFile(CHAR cFileName[])
 
 {
@@ -631,8 +1005,15 @@ DEFINE_FUNCTION readStuffFromFile(CHAR cFileName[])
 
 	WHILE(slResult>0)
 	{
-            slResult = FILE_READ_LINE(slFileHandle,oneline,MAX_LENGTH_STRING(oneline)) // grab one line from the file
+            
+	    
+	    //
+	    
+	    slResult = FILE_READ_LINE(slFileHandle,oneline,MAX_LENGTH_STRING(oneline)) // grab one line from the file
             parseLineFromFile(oneline) //sends line to parse function
+	    
+	    
+	    
 	}
     FILE_CLOSE(slFileHandle)   // CLOSE THE LOG FILE
     }           
@@ -666,7 +1047,7 @@ DEFINE_FUNCTION parseLineFromFile(CHAR aLine[2000]) //gets line here
 	nProtocol = 1;
     }
     ELSE IF (Protocol == 'udp')
-    {
+    { 
 	nProtocol = 2;
     }
     ELSE
@@ -674,13 +1055,15 @@ DEFINE_FUNCTION parseLineFromFile(CHAR aLine[2000]) //gets line here
 	nProtocol = 3;
     }
     send_command dvTP_LIGHT,"'^TXT-11,0,LocalPort',LocalPort";
-    send_command dvTP_LIGHT,"'^TXT-12,0,IPAddress',IPAddress";
-    send_command dvTP_LIGHT,"'^TXT-13,0,IPPort',IPPort";
+    send_command dvTP_LIGHT,"'^TXT-12,0,IPAddress',LocalPort";
+    //send_command dvTP_LIGHT,"'^TXT-12,0,IPAddress',IPAddress";
+    send_command dvTP_LIGHT,"'^TXT-13,0,IPPort',LocalPort";
+    //send_command dvTP_LIGHT,"'^TXT-13,0,IPPort',IPPort";
     send_command dvTP_LIGHT,"'^TXT-14,0,nProtocol',nProtocol";
 }
 
 
-
+*)
 
 
 
@@ -750,6 +1133,7 @@ timeline_create(tl_LAMPHOURS,lLampHoursTime,length_array(lLampHoursTime),timelin
 //Modules go last
 //define_module 'Sony_EVID100_Comm_dr1_0_0' COMM_CAM_1 (vdvCAM, dvCAM);
 define_module 'Sony_EVID100_Comm_dr1_0_0' mCamDev1(vdvCam, dvCam)
+define_module 'VirtualKeypad_dr1_0_0' VKP(VIRTUALKEYPAD,dvVIRTUALKEYPAD)
 
 (***********************************************************)
 (*                THE EVENTS GO BELOW                      *)
@@ -764,7 +1148,26 @@ data_event[dvMaster]
 {
     online:
     {
-	IP_CLIENT_OPEN(LocalPort,IPAddress,IPPort,nProtocol);
+	
+	
+	fnInitializeLightArray()
+	//Get IP info
+	fnReadFromFile()
+	//Initialize connection to lighting
+	fnOpenTCPConnect(dvLIGHTS, LIGHTING_IP_ADDRESS, LIGHTING_PORT)
+	fnInitializeLightConnection()
+	//Initialize Lighting Array
+	
+	fnQueryTP()
+	
+	//appendToFile('MAC_ADDRESSING.TXT','Function is working')
+	
+	(*
+	SLONG IP_CLIENT_OPEN (INTEGER LocalPort, CHAR ServerAddress[ ], LONG ServerPort, INTEGER Protocol)
+    *)
+
+	
+	
     }
 }
 
@@ -805,9 +1208,16 @@ data_event[vdvCAM]
 {
     online:
     {
-	send_command vdvCAM,"'SET BAUD 9600,N,8,1'";
-	send_command vdvCAM,"'HSOFF'";
+	//send_command vdvCAM,"'SET BAUD 9600,N,8,1'";
+	//send_command vdvCAM,"'HSOFF'";
     }
+    command:
+    {
+	local_var integer nIndex
+	nIndex = ATOI(REMOVE_STRING(data.text,'CAMERAPRESET-',1))
+	ON[dvTP_CAM,nPresetButtons[nIndex]]
+    }
+    
 }
 
 data_event[dvIR1]
@@ -878,9 +1288,79 @@ data_event[dvSWT1]
     
 }
 
+data_event[dvLIGHTS]
+{
+    online:
+    {
+	ON[dvLIGHTS,DEVICE_COMMUNICATING]
+    }
+    offline:
+    {
+	OFF[dvLIGHTS,DEVICE_COMMUNICATING]
+    }
+    onerror:
+    {
+    }
+    string:
+    {
+	local_var char sFromLightingControl[12]
+	local_var integer nZone
+	local_var integer nLevel
+	
+	//DL,[1:4],50
+	sFromLightingControl = data.text;			//String from device
+	fnParseLights(sFromLightingControl)
+	nZone = ATOI(mid_string(sFromLightingControl,7,1));	//Get Zone
+	nLevel = ATOI(mid_string(sFromLightingControl,10,3));	//Get Level
+	send_level dvTP_LIGHT, nLevelArray[nZone],(nLevel * 2.55);
+	
+    }
 
+    
+    
+    
+}
 
+data_event[VIRTUALKEYPAD]
+{
+    online:
+    {
+	send_command VIRTUALKEYPAD, "'LINETEXT1-'"
+	send_command VIRTUALKEYPAD, "'LINETEXT2-AMX'"
+	send_command VIRTUALKEYPAD, "'LINETEXT3-'"
+	send_command VIRTUALKEYPAD, "'LABEL1-TEST'"
+	send_command VIRTUALKEYPAD, "'LABEL2-',BUTTON2"
+	send_command VIRTUALKEYPAD, "'LABEL3-',BUTTON3"
+	send_command VIRTUALKEYPAD, "'LABEL4-',BUTTON4"
+	send_command VIRTUALKEYPAD, "'LABEL5-',BUTTON5"
+	send_command VIRTUALKEYPAD, "'LABEL6-',BUTTON6"
+	send_command VIRTUALKEYPAD, "'LABEL7-',BUTTON7"
+	send_command VIRTUALKEYPAD, "'LABEL8-',BUTTON8"
+	send_command VIRTUALKEYPAD, "'LABEL9-',BUTTON9"
+	send_command VIRTUALKEYPAD, "'LABEL10-',BUTTON10"
+	send_command VIRTUALKEYPAD, "'LABEL11-',BUTTON11"
+	send_command VIRTUALKEYPAD, "'LABEL12-',BUTTON12"
+    }
+    
+}
 
+data_event[dvTP]
+{
+    STRING:
+    {
+	sFromTP = data.text;
+	
+	sToSend = "'10001:1:0,',sFromTP,',',DATE,',',TIME"
+	
+	//appendToFile('MAC_ADDRESSING.TXT',sToSend)
+
+    }
+    ONLINE:
+    {
+
+    }
+    
+}
 
 //SWITCHER BUTTON EVENTS
 //
@@ -962,7 +1442,7 @@ button_event[dvTP_SEC,nVideoSwitcherButton]
 		cOUT = ATOI(cOutput)
 		send_string dvSWT1,"cInput,'*',cOutput,'S'";
 		
-		off[dvTP_SEC,nVideoSwitcherButtons[cOUT]];
+		//off[dvTP_SEC,nVideoSwitcherButtons[cOUT]];
 		on[dvTP_SEC,button.input.channel];
 	    }
 	}
@@ -991,6 +1471,9 @@ button_event[dvTP,0]
 		fnStartPollingDVD()
 		nActiveSource = COMPONENT;
 		fnSendToProj()
+
+		
+		
 	    }
 	    case 12:
 	    {
@@ -1118,8 +1601,11 @@ button_event[dvTP_DVD,0]
 //CAMERA CONTROL BUTTON EVENTS
 //
 //
-button_event[dvTP_CAM,0]
+button_event[dvTP_CAM,0] 
 {
+    
+
+
     push:
     {
 	switch(button.input.channel)
@@ -1131,11 +1617,34 @@ button_event[dvTP_CAM,0]
 	    case 158:	//Zoom +
 	    case 159:	//Zoom -
 	    {
-		    ON[vdvCAM,button.input.channel]
+		ON[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
+	    }
+	    case 261:	//Preset 1
+	    case 262:	//Preset 2
+	    case 263:	//Preset 3
+	    {
+		SEND_COMMAND vdvCAM,"'CAMERAPRESET-',ITOA(GET_LAST(nPresetButtons))";
 	    }
 	    case 3016:	//Focus
 	    {
-	    
+		//set flag
+		nFlag = 1
+	    }
+
+	}
+    }
+    release:
+    {
+	switch(button.input.channel)
+	{
+	    case 132:	//Up
+	    case 133:	//Down
+	    case 134:	//Left
+	    case 135:	//Right
+	    case 158:	//Zoom +
+	    case 159:	//Zoom -
+	    {
+		OFF[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
 	    }
 	    case 261:	//Preset 1
 	    case 262:	//Preset 2
@@ -1143,8 +1652,25 @@ button_event[dvTP_CAM,0]
 	    {
 	    
 	    }
+	    case 3016:	//Focus
+	    {
+		nFlag = 0
+	    }
 	}
     }
+}
+
+level_event[dvTP_LIGHT,3016]
+{
+    IF(nFlag = 1)
+    {
+	send_level vdvCAM, 3016, level.value
+    }
+}
+    
+level_event[vdvCAM,3016]
+{
+    send_level dvTP_CAM, 3016, level.value
 }
 
 //ROOM CONTROL BUTTON EVENTS
@@ -1231,7 +1757,222 @@ button_event[dvTP_SAT,0]
     }
 }
 
+//Lighting Control Button Events
+#WARN 'FILE READ FUNCTION IS STILL REFERENCING TEST DATA - FIX BEFORE DEPLOYING'
 
+button_event[dvTP_LIGHT,nRaiseDimButtons]
+{
+    push:
+    {
+	to[dvTP_LIGHT,button.input.channel]
+	send_string dvLIGHTS,"'RAISEDIM,[1:',ITOA(GET_LAST(nRaiseDimButtons)),']',$0d"; //Translates buttons to zones 1-4 via array index
+    }
+    release:
+    {
+	send_string dvLIGHTS,"'STOPDIM,[1:',ITOA(GET_LAST(nRaiseDimButtons)),']',$0d";
+    }
+
+}
+button_event[dvTP_LIGHT,nLowerDimButtons]
+{
+    push:
+    {
+	to[dvTP_LIGHT,button.input.channel]
+	send_string dvLIGHTS,"'LOWERDIM,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Translates buttons to zones 1-4 via array index
+    }
+    release:
+    {
+	send_string dvLIGHTS,"'STOPDIM,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d";
+    }
+
+}
+button_event[dvTP_LIGHT,nSceneButtons]
+{
+    push:
+    {
+	local_var integer nZoneLoop
+	local_var integer index
+	nZoneLoop = 1
+	index = GET_LAST(nSceneButtons)
+	//WHILE (nZoneLoop <=4)
+	on[dvTP_LIGHT,nSceneButtons]
+	//WHILE (nZoneLoop <5)
+
+	    
+	    
+	    //FADEDIM,intensity,fadetime,delaytime,[unit:zone]
+	    //This fucking string.
+	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+	    wait 30
+	    off[dvTP_LIGHT,nSceneButtons]
+	    nZoneLoop = 2
+	    wait 60
+	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+	    wait 90
+	    on[dvTP_LIGHT,nSceneButtons]
+	    nZoneLoop = 3 
+	    wait 120
+	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+	    wait 150
+	    off[dvTP_LIGHT,nSceneButtons]
+	    nZoneLoop = 4
+	    wait 180
+	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+	    on[dvTP_LIGHT,nSceneButtons]
+	    //send_command dvLights,"'FADEDIM,',ITOA(nTensity),',',,',0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
+	    
+    
+	off[dvTP_LIGHT,nSceneButtons]
+	send_command dvTP_LIGHT,"'^TXT-10,0,',instancedScenes[index].sceneName"
+    }
+    release:
+    {
+    }
+}
+(*
+button_event[dvTP_LIGHT,0] 
+{
+    push:
+    {
+	switch(button.input.channel)
+	{
+	    case 30:
+	    case 31:
+	    case 32:
+	    {	
+		//nSceneButtons for scene
+		
+		//Get light intensity from structure here. 
+		//set up arrays and use indexes to cycle through structure? 
+		//Create loop to cycle through all zones.
+		//Use GET_LAST(nSceneButtons) for instancedScenes. Uses array index to set scene 1-3.
+		local_var integer nZoneLoop
+		nZoneLoop = 1
+		
+		WHILE (nZoneLoop <=4)
+		{
+		    on[dvTP_LIGHT,nSceneButtons]
+		    wait 10
+		    //FADEDIM,intensity,fadetime,delaytime,[unit:zone]
+		    //This fucking string.
+		    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[GET_LAST(nSceneButtons)].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[GET_LAST(nSceneButtons)].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(GET_LAST(nSceneButtons)),']',$0d";
+		    //send_command dvLights,"'FADEDIM,',ITOA(nTensity),',',,',0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
+		    
+		    off[dvTP_LIGHT,nSceneButtons]
+		    nZoneLoop++
+		}
+	    (*
+		'FADEDIM,intensity(instancedScenes[GET_LAST(nSceneButtons)].instancedLights[nZoneLoop].lightIntensity),fadetime(instancedScenes[GET_LAST(nSceneButtons)].instancedLights[nZoneLoop].fadeTime),delaytime(always zero),[unit:scene(GET_LAST(nSceneButtons))]'
+		send_command dvLights,"'FADEDIM,',ITOA(nTensity),',',,',0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
+		
+		    #WARN 'I DIDNT COMPILE THIS CODE. COMMENT BEFORE COMPILING' 
+		    instancedScenes[1].sceneName = 'Scene 1'
+		    instancedScenes[1].instancedLights[1].lightIntensity	=	0
+		    instancedScenes[1].instancedLights[1].fadeTime		=	0
+		    instancedScenes[1].instancedLights[2].lightIntensity	=	0
+		    instancedScenes[1].instancedLights[2].fadeTime		=	0
+		    instancedScenes[1].instancedLights[3].lightIntensity	=	0
+		    instancedScenes[1].instancedLights[3].fadeTime		=	0
+		    instancedScenes[1].instancedLights[4].lightIntensity	=	0
+		    instancedScenes[1].instancedLights[4].fadeTime		=	0
+	    *)
+	    
+	    
+	    
+		//send_command dvLights,"'FADEDIM,',ITOA(nTensity),',0,0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
+		//SEND_STRING dvLIGHTS, "'FADEDIM,',ITOA(instancedScenes[GET_LAST(nSceneButtons)].zone[loop].lightIntensity),',',ITOA(lightingScenes[index].zone[loop].fadeTimer),',0,[1:',ITOA(loop),']',CR"
+		//			  FADEDIM        INTENSITY                              FADETIME                         DELAY TIME                                                 ADDRESS
+		
+		//Handles Feedback
+		send_string dvTP_LIGHT,"'^TXT-10,0,',instancedScenes[GET_LAST(nSceneButtons)].sceneName";
+		SceneFeedback = GET_LAST(nSceneButtons)
+		// instancedScenes[1].sceneName = 'Scene 1'
+	    }
+	    case 35:
+	    case 37: 
+	    case 39:
+	    case 41:
+	    case 36:
+	    case 38:
+	    case 40:
+	    case 42:
+	    {
+		to[dvTP_LIGHT,button.input.channel]
+		IF(button.input.channel = nLowerDimButtons) //This might not work. 
+		{
+		    send_command dvLIGHTS,"'LOWERDIM,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Translates buttons to zones 1-4 via array index
+		}
+		ELSE
+		{
+		    send_string dvLIGHTS,"'RAISEDIM,[1:',ITOA(GET_LAST(nRaiseDimButtons)),']',$0d"; //Translates buttons to zones 1-4 via array index
+		   // send_command dvLights,"'FADEDIM,',ITOA(nTensity),',0,0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
+		}
+	    }
+	}
+    }
+    release:
+    {
+	switch(button.input.channel)
+	{
+	    case 30:
+	    case 31:
+	    case 32:
+	    {
+	    }
+	    case 35:
+	    case 37: 
+	    case 39:
+	    case 41:
+	    {
+		send_string dvLIGHTS,"'STOPDIM,[1:',ITOA(GET_LAST(nRaiseDimButtons)),']',$0d";
+	    }
+	    case 36:
+	    case 38:
+	    case 40:
+	    case 42:
+	    {
+		send_string dvLIGHTS,"'STOPDIM,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d";
+	    }
+	}
+    }
+}
+*)
+//VIRTUAL KEYPAD BUTTON EVENTS
+button_event[VIRTUALKEYPAD,BTNS]	//really no reason to use the btns array here. Might want get rid of it.
+{
+    push:
+    {
+	switch(button.input.channel)
+	{
+	    case 5:
+	    case 6:
+	    case 7:
+	    case 8:
+	    {
+		do_push(dvTP,button.input.channel+6)
+	    }
+	    case 12:
+	    {
+		IF(nSystemStatus==1)
+		{
+		    //Turn off amp and device power
+		    pulse[dvRelays,AMP_POWER];
+		    wait 100
+		    pulse[dvRelays,DEV_POWER];
+		    nSystemStatus=0
+		}
+		ELSE
+		{
+		    //turn on amp and device power
+		    pulse[dvRelays,AMP_POWER];
+		    wait 100
+		    pulse[dvRelays,DEV_POWER];
+		    nSystemStatus=1
+		}
+	    }
+	}
+    }
+}
 
 //CHANNEL EVENT FOR SCREEN CONTROLS -- HANDLES FEEDBACK:
 channel_event[dvRelays,SCREEN_UP]
@@ -1296,6 +2037,18 @@ channel_event[dvIR1,CHAN_DN]
 
 }
 
+//CHANNEL EVENT FOR IP LIGHTING CONTROL
+channel_event[dvLIGHTS,DEVICE_COMMUNICATING]
+{
+    ON:
+    {
+	
+    }
+    OFF:
+    {
+	fnInitializeLightConnection()
+    }
+}
 
 //System Events
 //
@@ -1446,37 +2199,50 @@ timeline_event[tl_DVDPOLL]
 
 timeline_event[tl_FEEDBACK]
 {
-    
-    
-    
+    //Scence Feedback
+    [dvTP_LIGHT,30]	=	(SceneFeedback==1);
+    [dvTP_LIGHT,31]	=	(SceneFeedback==2);
+    [dvTP_LIGHT,32]	=	(SceneFeedback==3);
     
     // DVD CD Feedback
     
-    
-    [dvTP_DVD,1]	= (nDVDButton==1);
-    [dvTP_DVD,2]	= (nDVDButton==2);
-    [dvTP_DVD,3]	= (nDVDButton==3);
-    [dvTP_DVD,6]	= (nDVDButton==6);
-    [dvTP_DVD,7]	= (nDVDButton==7);
+    [dvTP_DVD,1]	=	(nDVDButton==1);
+    [dvTP_DVD,2]	=	(nDVDButton==2);
+    [dvTP_DVD,3]	=	(nDVDButton==3);
+    [dvTP_DVD,6]	=	(nDVDButton==6);
+    [dvTP_DVD,7]	=	(nDVDButton==7);
  
+    //Camera Control Feedback
+    [dvTP_CAM,132]	=	[vdvCAM,132];
+    [dvTP_CAM,133]	=	[vdvCAM,133];
+    [dvTP_CAM,134]	=	[vdvCAM,134];
+    [dvTP_CAM,135]	=	[vdvCAM,135];
+    [dvTP_CAM,158]	=	[vdvCAM,158];
+    [dvTP_CAM,159]	=	[vdvCAM,159];
+    
     
     
     // Main Page Feedback
-    [dvTP,11]		= (nActiveSource==COMPONENT); 	//1
-    [dvTP,12]		= (nActiveSource==SVIDEO);	//2
-    [dvTP,13]		= (nActiveSource==HDMI);	//3
-    [dvTP,14]		= (nActiveSource==VIDEO);	//4
-    [dvTP_ROOM,31]	= (nActiveSource==HDMI);	//3
-    [dvTP_ROOM,32]	= (nActiveSource==SVIDEO);	//2
-    [dvTP_ROOM,33]	= (nActiveSource==VIDEO);	//4
-    [dvTP_ROOM,34]	= (nActiveSource==COMPONENT);	//1
-    [dvTP_ROOM,255]	= (nProjStatus==1);
+    [dvTP,11]		=	(nActiveSource==COMPONENT);	//1
+    [dvTP,12]		=	(nActiveSource==SVIDEO);	//2
+    [dvTP,13]		=	(nActiveSource==HDMI);		//3
+    [dvTP,14]		=	(nActiveSource==VIDEO);		//4
+    [dvTP_ROOM,31]	=	(nActiveSource==HDMI);		//3
+    [dvTP_ROOM,32]	=	(nActiveSource==SVIDEO);	//2
+    [dvTP_ROOM,33]	=	(nActiveSource==VIDEO);		//4
+    [dvTP_ROOM,34]	=	(nActiveSource==COMPONENT);	//1
+    [dvTP_ROOM,255]	=	(nProjStatus==1);
 
-
+    //Virtual Keypad Feedback
+    [VIRTUALKEYPAD,5]	=	[dvTP,11]
+    [VIRTUALKEYPAD,6]	=	[dvTP,12]
+    [VIRTUALKEYPAD,7]	=	[dvTP,13]
+    [VIRTUALKEYPAD,8]	=	[dvTP,14]
+    [VIRTUALKEYPAD,12]	=	[dvTP,105]
     
     //Power Button Feedback
   
-    [dvTP,105] 		= (nSystemStatus==1);
+    [dvTP,105] 		=	(nSystemStatus==1);
     
 }
 (*****************************************************************)
