@@ -320,18 +320,11 @@ DEFINE_LATCHING
 (***********************************************************)
 DEFINE_MUTUALLY_EXCLUSIVE
 ([dvRelays,1]..[dvRelays,6])
-([dvTP_SEC,11]..[dvTP_SEC,14])
-([dvTP_SEC,21]..[dvTP_SEC,24])
-([dvTP_SEC,31]..[dvTP_SEC,34])
-([dvTP_SEC,41]..[dvTP_SEC,44])
-([dvTP_SEC,51]..[dvTP_SEC,54])
-([dvTP_SEC,61]..[dvTP_SEC,64])
-([dvTP_SEC,71]..[dvTP_SEC,74])
-([dvTP_SEC,81]..[dvTP_SEC,84])
-([dvTP_SEC,91]..[dvTP_SEC,94])
-([dvTP_SEC,101]..[dvTP_SEC,104])
-([dvTP_SEC,111]..[dvTP_SEC,114])
-([dvTP_SEC,121]..[dvTP_SEC,124])
+([dvTP_SEC,11],[dvTP_SEC,21],[dvTP_SEC,31],[dvTP_SEC,41],[dvTP_SEC,51],[dvTP_SEC,61],[dvTP_SEC,71],[dvTP_SEC,81],[dvTP_SEC,91],[dvTP_SEC,101],[dvTP_SEC,111],[dvTP_SEC,121])
+([dvTP_SEC,12],[dvTP_SEC,22],[dvTP_SEC,32],[dvTP_SEC,42],[dvTP_SEC,52],[dvTP_SEC,62],[dvTP_SEC,72],[dvTP_SEC,82],[dvTP_SEC,92],[dvTP_SEC,102],[dvTP_SEC,112],[dvTP_SEC,122])
+([dvTP_SEC,13],[dvTP_SEC,23],[dvTP_SEC,33],[dvTP_SEC,43],[dvTP_SEC,53],[dvTP_SEC,63],[dvTP_SEC,73],[dvTP_SEC,83],[dvTP_SEC,93],[dvTP_SEC,103],[dvTP_SEC,113],[dvTP_SEC,123])
+([dvTP_SEC,14],[dvTP_SEC,24],[dvTP_SEC,34],[dvTP_SEC,44],[dvTP_SEC,54],[dvTP_SEC,64],[dvTP_SEC,74],[dvTP_SEC,84],[dvTP_SEC,94],[dvTP_SEC,104],[dvTP_SEC,114],[dvTP_SEC,124])
+
 
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
@@ -1294,46 +1287,32 @@ data_event[dvSWT1]
 	send_command dvSWT1,"'HSOFF'";
     }
     string: 				// String Handler -- handles feedback from switcher
-    {
-	//local_var char sFromSWT1[9];
-	//local_var char sInput[2];
-	//local_var char sOutput[1];
-	
+    {	
 	local_var char sFromSWT1[100];
-	local_var char sParseInput[100];
+	local_var char sParseOutput[100];
 	local_var char sInput[100];
 	local_var char sOutput[100];
+	local_var char sStatus[100];
 	local_var char sButton[5];
-	
-	//local_var char cStatusByte[1];
-	//local_var char cInputByte[1];
+
 	sFromSWT1 = data.text;
-	
+	sStatus = data.text;
 	
 	//sFromSWT1 = OUT4IN9S
-	sParseInput = REMOVE_STRING(sFromSWT1,'IN',1)
+	sParseOutput = REMOVE_STRING(sFromSWT1,'IN',1)
 	//sParseInput = OUT4IN
 	//SFromSwt1 = 9S
 	
-	sInput = LEFT_STRING(sParseInput,LENGTH_STRING(sParseInput)-1);
+	sInput = LEFT_STRING(sFromSWT1,LENGTH_STRING(sFromSWT1)-1);
 	//sInput = 9
-	sOutput = MID_STRING(sFromSWT1,4,LENGTH_STRING(sFromSWT1)-5);
+	sOutput = MID_STRING(sParseOutput,4,LENGTH_STRING(sParseOutput)-5);
 	//sOutput = 4
 	
-	//cInput = REMOVE_STRING(sFromSWT1,'IN',1)
-	//sInput = type_cast(mid_string(sFromSWT1,7,LENGTH_STRING(sFromSWT1) - 7));
-	//sOutput = type_cast(mid_string(sFromSWT1,4,1));
 	send_command dvTP_SEC,"'^TXT-11,0,OUT',sOutput";
-	send_command dvTP_SEC,"'^TXT-12,0,',sFromSWT1";
+	send_command dvTP_SEC,"'^TXT-12,0,',sStatus";
 	send_command dvTP_SEC,"'^TXT-13,0,IN',sInput";
-	//cInput = type_cast(LEFT_STRING(cButtonString,LENGTH_STRING(cButtonString) - 1)
-	sButton = "sInput,sOutput"
-	//fnParseSWT1(sFromSWT1); //sends string to parse function
-	
-	    //to[dvTP,button.input.channel]
+	sButton = "sInput,sOutput"	
 	on[dvTP_SEC,ATOI(sButton)];
-
-
     }
     
 }
@@ -1453,7 +1432,8 @@ button_event[dvTP_SEC,nVideoSwitcherButton]
 		sInput = LEFT_STRING(sButtonString,LENGTH_STRING(sButtonString) - 1)
 		nOUT = ATOI(sOutput)
 		send_string dvSWT1,"sInput,'*',sOutput,'S'";
-		
+		nActiveSource = VIDEO;
+		fnSendToProj()
 		//off[dvTP_SEC,nVideoSwitcherButtons[cOUT]];
 		//on[dvTP_SEC,button.input.channel];
 	    
