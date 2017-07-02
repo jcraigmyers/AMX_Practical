@@ -788,7 +788,9 @@ DEFINE_FUNCTION fnQueryTP()
 {	
     
     SEND_COMMAND dvTP,"'?MAC'"
+
 }
+
 
 //WRITE TO FILE
 
@@ -1169,7 +1171,7 @@ data_event[dvMaster]
 	//fnInitializeLightConnection()
 	//Initialize Lighting Array
 	
-	//fnQueryTP()
+	fnQueryTP()
 	
 
 	(*
@@ -1383,6 +1385,10 @@ data_event[dvTP]
 custom_event[dvTP,0,1315]//This was such a fucking pain in the ass to figure out
 {
     sFromTP = custom.text
+    cDATE = DATE
+    cTIME = TIME
+    sToSend = "'10001:1:0,',sFromTP,',',cDate,'&',cTime"
+    appendToFile('MAC_ADDRESSING.TXT',sToSend)
 }
 
 
@@ -2019,10 +2025,13 @@ button_event[VIRTUALKEYPAD,BTNS]	//really no reason to use the btns array here. 
 	{
 	    case 5:
 	    {
+		//Let's put this in a function.
+		(*
 		cDATE = DATE
 		cTIME = TIME
 		sToSend = "'10001:1:0,',sFromTP,',',cDate,'&',cTime"
-		appendToFile('TEST.txt',sToSend)
+		appendToFile('MAC_ADDRESSING.TXT',sToSend)
+		*)
 	    }
 	    case 6:
 	    {
