@@ -272,11 +272,14 @@ volatile integer nCameraButtons[]=
     132,133,134,135,158,159
 };
 
-
+volatile integer nSatButtons[]=
+{
+    1041,1042,1043,1044,1045,1046
+};
 
 //volatile integer Array1[6]; //This doesn't work with the emulator
 //volatile char Array1[6][8];
-volatile integer Array1[6];
+volatile integer nTVStations[6];
 
 
 //Timeline helpers
@@ -1258,31 +1261,17 @@ data_event[dvIR1]
 	send_command dvIR1,"'CARON'";			// Set Carrier ON
 	send_command dvIR1,"'CTON',3";			// Set queuing time to 3 tenths of a second on
 	send_command dvIR1,"'CTOF',2";			// Set queuing time to 2 tenths of a second off
-	//Create an integer array and assign 6 TV station nymbers during the ONLINE event for this device.
 	send_command dvIR1,"'XCHM-1'";
 	
-	
-	//example
-	//IntegerNum[ ] = {1, 2, 3, 4, 5}
-	
-	
-	
+    //Create an integer array and assign 6 TV station nymbers during the ONLINE event for this device.
 
-	//Array1[] = {10, 200, 33, 1, 14, 12};
+	nTVStations[1] = 10;
+	nTVStations[2] = 200;
+	nTVStations[3] = 33;
+	nTVStations[4] = 1;
+	nTVStations[5] = 14;
+	nTVStations[6] = 12;
 	
-	Array1[1] = 10;
-	Array1[2] = 200;
-	Array1[3] = 33;
-	Array1[4] = 1;
-	Array1[5] = 14;
-	Array1[6] = 12;
-	
-	//Array1[1] = "'XCH-1'";
-	//Array1[2] = "'XCH-2'";
-	//Array1[3] = "'XCH-3'";
-	//Array1[4] = "'XCH-4'";
-	//Array1[5] = "'XCH-5'";
-	//Array1[6] = "'XCH-10'"; //Try changing these to send strings. 
     }
 }
 
@@ -1662,53 +1651,7 @@ button_event[dvTP_DVD,0]
 }
 
 //CAMERA CONTROL BUTTON EVENTS
-//
-//
-(*
-button_event[dvTP_CAM,0] 
-{
-    push:
-    {
-	switch(button.input.channel)
-	{
-	    case 132:	//Up
-	    case 133:	//Down
-	    case 134:	//Left
-	    case 135:	//Right
-	    case 158:	//Zoom +
-	    case 159:	//Zoom -
-	    {
-		ON[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
-	    }
-	    case 3016:	//Focus
-	    {
-		//set flag
-		nFlag = 1
-	    }
 
-	}
-    }
-    release:
-    {
-	switch(button.input.channel)
-	{
-	    case 132:	//Up
-	    case 133:	//Down
-	    case 134:	//Left
-	    case 135:	//Right
-	    case 158:	//Zoom +
-	    case 159:	//Zoom -
-	    {
-		OFF[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
-	    }
-	    case 3016:	//Focus
-	    {
-		nFlag = 0
-	    }
-	}
-    }
-}
-*)
 button_event[dvTP_CAM,nCameraButtons]
 {
     push:
@@ -1720,6 +1663,7 @@ button_event[dvTP_CAM,nCameraButtons]
 	OFF[vdvCAM,button.input.channel]	
     }
 }
+
 button_event[dvTP_CAM,3016]
 {
     push:
@@ -1731,6 +1675,7 @@ button_event[dvTP_CAM,3016]
 	nFlag = 0
     }
 }
+
 button_event[dvTP_CAM,nPresetButtons]
 {
     push:
@@ -1741,7 +1686,6 @@ button_event[dvTP_CAM,nPresetButtons]
     {
     }
 }
-
 
 level_event[dvTP_LIGHT,3016]
 {
@@ -1819,6 +1763,18 @@ button_event[dvTP_SAT,0]
 		pulse[dvIR1,CHAN_DN];
 		set_pulse_time(5);
 	    }
+	}
+    }
+}
+
+button_event[dvTP_SAT,nSatButtons]
+{
+    push:
+    {
+	send_command dvIR1,"'XCH-',ITOA(nTVStations[GET_LAST(nSatButtons)])"; // This doesn't work with the emulator -- Fixed with ITOA
+	to[dvTP_SAT,button.input.channel]
+    }
+    (*
 	    case 1041:	
 	    case 1042:	
 	    case 1043:	
@@ -1826,18 +1782,18 @@ button_event[dvTP_SAT,0]
 	    case 1045:	
 	    case 1046:	
 	    {
-		local_var integer cPreset;
-		cPreset = button.input.channel - 1040
-		send_command dvIR1,"'XCH-',ITOA(Array1[cPreset])"; // This doesn't work with the emulator -- Fixed with ITOA
-		//send_command dvIR1,Array1[cPreset]
+		local_var integer nPreset;
+		nPreset = button.input.channel - 1040
+		send_command dvIR1,"'XCH-',ITOA(nTVStations[nPreset])"; // This doesn't work with the emulator -- Fixed with ITOA
 		to[dvTP_SAT,button.input.channel]
 	    }
 	    default:
 	    {
-		to[dvTP_SAT,button.input.channel]
+		//to[dvTP_SAT,button.input.channel]
 	    }
 	}
     }
+    *)
 }
 
 //Lighting Control Button Events
