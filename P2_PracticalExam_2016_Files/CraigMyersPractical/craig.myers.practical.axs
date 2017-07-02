@@ -320,7 +320,18 @@ DEFINE_LATCHING
 (***********************************************************)
 DEFINE_MUTUALLY_EXCLUSIVE
 ([dvRelays,1]..[dvRelays,6])
-
+([dvTP_SEC,11]..[dvTP_SEC,14])
+([dvTP_SEC,21]..[dvTP_SEC,24])
+([dvTP_SEC,31]..[dvTP_SEC,34])
+([dvTP_SEC,41]..[dvTP_SEC,44])
+([dvTP_SEC,51]..[dvTP_SEC,54])
+([dvTP_SEC,61]..[dvTP_SEC,64])
+([dvTP_SEC,71]..[dvTP_SEC,74])
+([dvTP_SEC,81]..[dvTP_SEC,84])
+([dvTP_SEC,91]..[dvTP_SEC,94])
+([dvTP_SEC,101]..[dvTP_SEC,104])
+([dvTP_SEC,111]..[dvTP_SEC,114])
+([dvTP_SEC,121]..[dvTP_SEC,124])
 
 (***********************************************************)
 (*        SUBROUTINE/FUNCTION DEFINITIONS GO BELOW         *)
@@ -1284,23 +1295,43 @@ data_event[dvSWT1]
     }
     string: 				// String Handler -- handles feedback from switcher
     {
-	local_var char sFromSWT1[9];
-	local_var char cInput[2];
-	local_var char cOutput[1];
+	//local_var char sFromSWT1[9];
+	//local_var char sInput[2];
+	//local_var char sOutput[1];
+	
+	local_var char sFromSWT1[100];
+	local_var char sParseInput[100];
+	local_var char sInput[100];
+	local_var char sOutput[100];
+	local_var char sButton[5];
+	
 	//local_var char cStatusByte[1];
 	//local_var char cInputByte[1];
 	sFromSWT1 = data.text;
-	//cInput = REMOVE_STRING(sFromSWT1,'IN',1)
-	cInput = type_cast(mid_string(sFromSWT1,7,LENGTH_STRING(sFromSWT1) - 7));
-	cOutput = type_cast(mid_string(sFromSWT1,4,1));
-	send_command dvTP_SEC,"'^TXT-11,0,OUT',cOutput";
-	send_command dvTP_SEC,"'^TXT-12,0,',sFromSWT1";
-	send_command dvTP_SEC,"'^TXT-13,0,IN',cInput";
-	//cInput = type_cast(LEFT_STRING(cButtonString,LENGTH_STRING(cButtonString) - 1)
 	
+	
+	//sFromSWT1 = OUT4IN9S
+	sParseInput = REMOVE_STRING(sFromSWT1,'IN',1)
+	//sParseInput = OUT4IN
+	//SFromSwt1 = 9S
+	
+	sInput = LEFT_STRING(sParseInput,LENGTH_STRING(sParseInput)-1);
+	//sInput = 9
+	sOutput = MID_STRING(sFromSWT1,4,LENGTH_STRING(sFromSWT1)-5);
+	//sOutput = 4
+	
+	//cInput = REMOVE_STRING(sFromSWT1,'IN',1)
+	//sInput = type_cast(mid_string(sFromSWT1,7,LENGTH_STRING(sFromSWT1) - 7));
+	//sOutput = type_cast(mid_string(sFromSWT1,4,1));
+	send_command dvTP_SEC,"'^TXT-11,0,OUT',sOutput";
+	send_command dvTP_SEC,"'^TXT-12,0,',sFromSWT1";
+	send_command dvTP_SEC,"'^TXT-13,0,IN',sInput";
+	//cInput = type_cast(LEFT_STRING(cButtonString,LENGTH_STRING(cButtonString) - 1)
+	sButton = "sInput,sOutput"
 	//fnParseSWT1(sFromSWT1); //sends string to parse function
 	
 	    //to[dvTP,button.input.channel]
+	on[dvTP_SEC,ATOI(sButton)];
 
 
     }
@@ -1413,82 +1444,20 @@ button_event[dvTP_SEC,nVideoSwitcherButton]
 {
     push:
     {
-	switch(button.input.channel)
-	{
-	    case 11:
-	    case 12:
-	    case 13:
-	    case 14:
-	    
-	    case 21:
-	    case 22:
-	    case 23:
-	    case 24:
-	    
-	    case 31:
-	    case 32:
-	    case 33:
-	    case 34:
-	    
-	    case 41:
-	    case 42:
-	    case 43:
-	    case 44:
-	    
-	    case 51:
-	    case 52:
-	    case 53:
-	    case 54:
-	    
-	    case 61:
-	    case 62:
-	    case 63:
-	    case 64:
-	    
-	    case 71:
-	    case 72:
-	    case 73:
-	    case 74:
-	    
-	    case 81:
-	    case 82:
-	    case 83:
-	    case 84:
-	    
-	    case 91:
-	    case 92:
-	    case 93:
-	    case 94:
-	    
-	    case 101:
-	    case 102:
-	    case 103:
-	    case 104:
-	    
-	    case 111:
-	    case 112:
-	    case 113:
-	    case 114:
-	    
-	    case 121:
-	    case 122:
-	    case 123:
-	    case 124:
-	    {	
-		stack_var char cButtonString[3]
-		stack_var char cInput[2]
-		stack_var char cOutput[1]
-		stack_var integer cOUT
-		cButtonString = ITOA(button.input.channel)
-		cOutput = RIGHT_STRING(cButtonString,1)
-		cInput = LEFT_STRING(cButtonString,LENGTH_STRING(cButtonString) - 1)
-		cOUT = ATOI(cOutput)
-		send_string dvSWT1,"cInput,'*',cOutput,'S'";
+		stack_var char sButtonString[3]
+		stack_var char sInput[2]
+		stack_var char sOutput[1]
+		stack_var integer nOUT
+		sButtonString = ITOA(button.input.channel)
+		sOutput = RIGHT_STRING(sButtonString,1)
+		sInput = LEFT_STRING(sButtonString,LENGTH_STRING(sButtonString) - 1)
+		nOUT = ATOI(sOutput)
+		send_string dvSWT1,"sInput,'*',sOutput,'S'";
 		
 		//off[dvTP_SEC,nVideoSwitcherButtons[cOUT]];
-		on[dvTP_SEC,button.input.channel];
-	    }
-	}
+		//on[dvTP_SEC,button.input.channel];
+	    
+    
     }
 }
 
