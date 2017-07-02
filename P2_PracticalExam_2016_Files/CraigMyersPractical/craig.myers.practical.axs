@@ -1774,26 +1774,6 @@ button_event[dvTP_SAT,nSatButtons]
 	send_command dvIR1,"'XCH-',ITOA(nTVStations[GET_LAST(nSatButtons)])"; // This doesn't work with the emulator -- Fixed with ITOA
 	to[dvTP_SAT,button.input.channel]
     }
-    (*
-	    case 1041:	
-	    case 1042:	
-	    case 1043:	
-	    case 1044:	
-	    case 1045:	
-	    case 1046:	
-	    {
-		local_var integer nPreset;
-		nPreset = button.input.channel - 1040
-		send_command dvIR1,"'XCH-',ITOA(nTVStations[nPreset])"; // This doesn't work with the emulator -- Fixed with ITOA
-		to[dvTP_SAT,button.input.channel]
-	    }
-	    default:
-	    {
-		//to[dvTP_SAT,button.input.channel]
-	    }
-	}
-    }
-    *)
 }
 
 //Lighting Control Button Events
