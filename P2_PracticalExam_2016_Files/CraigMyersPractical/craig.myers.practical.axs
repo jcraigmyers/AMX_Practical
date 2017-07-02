@@ -1,7 +1,7 @@
 PROGRAM_NAME='craig.myers.practical'
-//#WARN	'I spent _27_ hrs on ths program'
+//#WARN	'I spent about 80 hrs on ths program'
 //#WARN	'System Requirements ver: 2.5 Device Specs ver: 2.2 Video Flow ver: 2.2 Connector Detail ver: 2.2 ControlSingleLines ver:2.2'
-//#WARN	'Code tested on master/controller type _____ with firmware version _____'
+//#WARN	'Code tested on master/controller type NI-3100 with firmware version 4.1.419'
 (***********************************************************)
 (*  FILE CREATED ON: 06/18/2016  AT: 15:50:26              *)
 (***********************************************************)
@@ -267,7 +267,10 @@ volatile integer nPresetButtons[]=
     261,262,263
 };
 
-
+volatile integer nCameraButtons[]=
+{
+    132,133,134,135,158,159
+};
 
 
 
@@ -779,7 +782,13 @@ define_function fnStartPollingDVD()
 //    }
 //}
 
-
+DEFINE_FUNCTION fnParseVDVCAM(sToParse[13])	//This should work. It's not working, but it should.
+{
+    local_var integer nPresetIndex
+    nPresetIndex = ATOI(REMOVE_STRING(sToParse,'CAMERAPRESET-',1));
+    ON[dvTP_CAM,nPresetButtons[nPresetIndex]];
+    //ON[dvTP_CAM,261];
+}
 
 // FILE OPERATIONS
 //
@@ -1144,7 +1153,7 @@ timeline_create(tl_LAMPHOURS,lLampHoursTime,length_array(lLampHoursTime),timelin
 
 //Modules go last
 //define_module 'Sony_EVID100_Comm_dr1_0_0' COMM_CAM_1 (vdvCAM, dvCAM);
-define_module 'Sony_EVID100_Comm_dr1_0_0' mCamDev1(vdvCam, dvCam)
+define_module 'Sony_EVID100_Comm_dr1_0_0' mCamDev1(vdvCAM, dvCAM)
 define_module 'VirtualKeypad_dr1_0_0' VKP(VIRTUALKEYPAD,dvVIRTUALKEYPAD)
 
 (***********************************************************)
@@ -1186,6 +1195,7 @@ data_event[dvMaster]
 
     
     }
+
 }
 
 
@@ -1228,11 +1238,14 @@ data_event[vdvCAM]
 	//send_command vdvCAM,"'SET BAUD 9600,N,8,1'";
 	//send_command vdvCAM,"'HSOFF'";
     }
+  
+    
+
     command:
     {
-	local_var integer nIndex
-	nIndex = ATOI(REMOVE_STRING(data.text,'CAMERAPRESET-',1))
-	ON[dvTP_CAM,nPresetButtons[nIndex]]
+	local_var char sFromCAM[13]
+	sFromCAM = data.text;
+	fnParseVDVCAM(sFromCAM)
     }
     
 }
@@ -1651,11 +1664,9 @@ button_event[dvTP_DVD,0]
 //CAMERA CONTROL BUTTON EVENTS
 //
 //
+(*
 button_event[dvTP_CAM,0] 
 {
-    
-
-
     push:
     {
 	switch(button.input.channel)
@@ -1668,12 +1679,6 @@ button_event[dvTP_CAM,0]
 	    case 159:	//Zoom -
 	    {
 		ON[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
-	    }
-	    case 261:	//Preset 1
-	    case 262:	//Preset 2
-	    case 263:	//Preset 3
-	    {
-		SEND_COMMAND vdvCAM,"'CAMERAPRESET-',ITOA(GET_LAST(nPresetButtons))";
 	    }
 	    case 3016:	//Focus
 	    {
@@ -1696,12 +1701,6 @@ button_event[dvTP_CAM,0]
 	    {
 		OFF[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
 	    }
-	    case 261:	//Preset 1
-	    case 262:	//Preset 2
-	    case 263:	//Preset 3
-	    {
-	    
-	    }
 	    case 3016:	//Focus
 	    {
 		nFlag = 0
@@ -1709,6 +1708,40 @@ button_event[dvTP_CAM,0]
 	}
     }
 }
+*)
+button_event[dvTP_CAM,nCameraButtons]
+{
+    push:
+    {
+	ON[vdvCAM,button.input.channel]	//buttons map to SNAPI channels - no need to redefine the wheel
+    }
+    release:
+    {
+	OFF[vdvCAM,button.input.channel]	
+    }
+}
+button_event[dvTP_CAM,3016]
+{
+    push:
+    {
+	nFlag = 1
+    }
+    release:
+    {
+	nFlag = 0
+    }
+}
+button_event[dvTP_CAM,nPresetButtons]
+{
+    push:
+    {
+	SEND_COMMAND vdvCAM,"'CAMERAPRESET-',ITOA(GET_LAST(nPresetButtons))"; //This likely won't work without an actual camera
+    }
+    release:
+    {
+    }
+}
+
 
 level_event[dvTP_LIGHT,3016]
 {
