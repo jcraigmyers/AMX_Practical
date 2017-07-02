@@ -152,41 +152,6 @@
 <FilePathName>_MODULE\VirtualKeypad_2_0_1\VirtualKeypad_dr1_0_0.jar</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="Netlinx" Type="Other"><Identifier>connectorDetail_2.2</Identifier>
-<FilePathName>_OTHER\connectorDetail_2.2.bmp</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>controlSingleLines_2.2</Identifier>
-<FilePathName>_OTHER\controlSingleLines_2.2.bmp</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>Device Specification 2_5</Identifier>
-<FilePathName>_OTHER\Device Specification 2_5.pdf</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>EMU_READMErev1</Identifier>
-<FilePathName>_OTHER\EMU_READMErev1.TXT</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>readme</Identifier>
-<FilePathName>_OTHER\readme.txt</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>System Requirements Rev 2 5</Identifier>
-<FilePathName>_OTHER\System Requirements Rev 2 5.pdf</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>VideoFlow_2.2</Identifier>
-<FilePathName>_OTHER\VideoFlow_2.2.bmp</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
 <File CompileType="Netlinx" Type="TP4"><Identifier>Programmer Practical TP File</Identifier>
 <FilePathName>_UI\Programmer Practical TP File.TP4</FilePathName>
 <Comments></Comments>

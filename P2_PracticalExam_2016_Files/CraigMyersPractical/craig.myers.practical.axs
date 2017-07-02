@@ -161,9 +161,9 @@ VOLATILE integer cPos3 // Position of the third comma
 
 //IP stuff
 VOLATILE INTEGER nLocalPort		//Integer
-VOLATILE INTEGER LocalPort
-VOLATILE CHAR IPAddress		//String
-VOLATILE LONG IPPort		//Long
+VOLATILE CHAR LocalPort[15]
+VOLATILE CHAR IPAddress[15]// = '10.0.0.26';
+VOLATILE char IPPort[3]//	= 24
 VOLATILE INTEGER nProtocol	//Integer
 
 
@@ -299,8 +299,10 @@ volatile integer nSelectedOutput;
 
 
 volatile integer nFlag;
-volatile char sFromTP[100];
+volatile char sFromTP[1024];
 volatile CHAR sToSend[1024]
+volatile char cTIME[20]
+volatile char cDATE[20]
 
 (***********************************************************)
 (*               LATCHING DEFINITIONS GO BELOW             *)
@@ -460,8 +462,8 @@ define_function fnParseProj(char sToParse[9]) // This gets all strings from the 
 	active(cByte4 == "$04"): 			//
 	{
 	   
-	
-	   send_command dvTP_ROOM,"'^TXT-14,0,',HDMI"; //Need to revisit this. Not sure if it will even work. 
+	    send_command dvTP_ROOM,"'^TXT-14,0,TEST'"; //Need to revisit this. Not sure if it will even work. 
+	    //send_command dvTP_ROOM,"'^TXT-14,0,',HDMI"; //Need to revisit this. Not sure if it will even work. 
 	    
 	}
     }
@@ -668,47 +670,52 @@ DEFINE_FUNCTION fnOpenTCPConnect(DEV dvIP, CHAR IP4_ADDRESS[15], LONG IP_PORT) /
 	IP_CLIENT_OPEN (dvIP.PORT, IP4_ADDRESS, IP_PORT, IP_TCP)
     }
 }
-define_function	fnInitializeLightConnection()
+(*
+define_function	fnInitializeLightConnection(DEV dvIP, CHAR IP4_ADDRESS[15], LONG IP_PORT)
 {
+    IF(![dvIP, 251])
+    {
+	IP_CLIENT_OPEN (dvIP.PORT, IP4_ADDRESS, IP_PORT, IP_TCP)
+    }
     //IP_CLIENT_OPEN(4,IPAddress,IPPort,nProtocol);
     //IP_CLIENT_OPEN(4,10.0.0.26,24,1);
-(*
+
     IF	(dvLIGHTS == LocalPort) //IP_ADDRESSING must match dvLights
     {
 	
 	
-    }*)
-}
+    }
+}*)
 
 define_function	fnInitializeLightArray()
 {
     instancedScenes[1].sceneName = 'Scene 1'
     instancedScenes[1].instancedLights[1].lightIntensity	=	10
-    instancedScenes[1].instancedLights[1].fadeTime		=	1
+    instancedScenes[1].instancedLights[1].fadeTime		=	0
     instancedScenes[1].instancedLights[2].lightIntensity	=	20
-    instancedScenes[1].instancedLights[2].fadeTime		=	1
+    instancedScenes[1].instancedLights[2].fadeTime		=	0
     instancedScenes[1].instancedLights[3].lightIntensity	=	30
-    instancedScenes[1].instancedLights[3].fadeTime		=	1
+    instancedScenes[1].instancedLights[3].fadeTime		=	0
     instancedScenes[1].instancedLights[4].lightIntensity	=	40
-    instancedScenes[1].instancedLights[4].fadeTime		=	1
+    instancedScenes[1].instancedLights[4].fadeTime		=	0
     instancedScenes[2].sceneName = 'Scene 2'			
     instancedScenes[2].instancedLights[1].lightIntensity	=	80
-    instancedScenes[2].instancedLights[1].fadeTime		=	3
+    instancedScenes[2].instancedLights[1].fadeTime		=	0
     instancedScenes[2].instancedLights[2].lightIntensity	=	90
-    instancedScenes[2].instancedLights[2].fadeTime		=	3
+    instancedScenes[2].instancedLights[2].fadeTime		=	0
     instancedScenes[2].instancedLights[3].lightIntensity	=	99
-    instancedScenes[2].instancedLights[3].fadeTime		=	3
+    instancedScenes[2].instancedLights[3].fadeTime		=	0
     instancedScenes[2].instancedLights[4].lightIntensity	=	60
-    instancedScenes[2].instancedLights[4].fadeTime		=	3
+    instancedScenes[2].instancedLights[4].fadeTime		=	0
     instancedScenes[3].sceneName = 'Scene 3'
     instancedScenes[3].instancedLights[1].lightIntensity	=	0
-    instancedScenes[3].instancedLights[1].fadeTime		=	1
+    instancedScenes[3].instancedLights[1].fadeTime		=	0
     instancedScenes[3].instancedLights[2].lightIntensity	=	0
-    instancedScenes[3].instancedLights[2].fadeTime		=	1
+    instancedScenes[3].instancedLights[2].fadeTime		=	0
     instancedScenes[3].instancedLights[3].lightIntensity	=	0
-    instancedScenes[3].instancedLights[3].fadeTime		=	1
+    instancedScenes[3].instancedLights[3].fadeTime		=	0
     instancedScenes[3].instancedLights[4].lightIntensity	=	0
-    instancedScenes[3].instancedLights[4].fadeTime		=	1
+    instancedScenes[3].instancedLights[4].fadeTime		=	0
 }
 
 //FADEDIM, INTENSITY, FADE TIME, DELAY TIME, ADDRESS
@@ -778,7 +785,8 @@ define_function fnStartPollingDVD()
 //
 //
 DEFINE_FUNCTION fnQueryTP()
-{
+{	
+    
     SEND_COMMAND dvTP,"'?MAC'"
 }
 
@@ -945,8 +953,10 @@ DEFINE_FUNCTION fnReadFromFile()
     LocalPort 	= type_cast(LEFT_STRING(StrExp,cPos1-1)); //Grabs everything left of cPos1
     //nLocalPort = ATOI(LocalPort)
     //LocalPort 	= type_cast(LEFT_STRING(StrExp,5)); //Might have to convert sPos1 to a long, but first let's test setting the count to 5
-    IPAddress 	= type_cast(mid_string(StrExp,cPos1+1,cPos2-cPos1)); 
-    IPPort 	= type_cast(mid_string(StrExp,cPos2+1,cPos3-cPos2)); //Should grab string x in length starting at cPos1.
+    IPAddress 	= mid_string(StrExp,cPos1+1,cPos2-cPos1); 
+    //IPAddress	= '10.0.0.26' //This much works
+    //IPPort = 24	//This much works
+    IPPort 	= mid_string(StrExp,cPos2+1,cPos3-cPos2); //Should grab string x in length starting at cPos1. //Problem is here. You need to convert it !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Protocol 	= type_cast(mid_string(StrExp,cPos3+1,3)); //grabs what's left over. 
     IF (Protocol == 'tcp')
     {
@@ -960,12 +970,12 @@ DEFINE_FUNCTION fnReadFromFile()
     {
 	nProtocol = 3;
     }
-    (*
+    
     send_command dvTP_LIGHT,"'^TXT-11,0,',LocalPort";
     
     send_command dvTP_LIGHT,"'^TXT-12,0,',IPAddress";
     //send_command dvTP_LIGHT,"'^TXT-12,0,IPAddress',IPAddress";
-    send_command dvTP_LIGHT,"'^TXT-13,0,',IPPort";
+    send_command dvTP_LIGHT,"'^TXT-13,0,',ITOA(IPPort)";
     //send_command dvTP_LIGHT,"'^TXT-13,0,IPPort',IPPort";
     send_command dvTP_LIGHT,"'^TXT-14,0,',ITOA(nProtocol)";
     
@@ -977,7 +987,7 @@ DEFINE_FUNCTION fnReadFromFile()
     ELSE
 	{
 	    send_command dvTP_LIGHT,"'^TXT-10,0,FAIL'"
-	}*)
+	}
     //send_command dvTP_LIGHT,"'^TXT-10,0,',cIPdevice,',',ITOA(cPos1),',',ITOA(cPos2),',',ITOA(cPos3),',',ITOA(POS),',',Protocol";
     
     
@@ -1154,20 +1164,25 @@ data_event[dvMaster]
 	//Get IP info
 	fnReadFromFile()
 	//Initialize connection to lighting
-	fnOpenTCPConnect(dvLIGHTS, LIGHTING_IP_ADDRESS, LIGHTING_PORT)
-	fnInitializeLightConnection()
+	fnOpenTCPConnect(dvLIGHTS, IPAddress, ATOI(IPPort))
+	//fnOpenTCPConnect(dvLIGHTS, LIGHTING_IP_ADDRESS, LIGHTING_PORT)
+	//fnInitializeLightConnection()
 	//Initialize Lighting Array
 	
-	fnQueryTP()
+	//fnQueryTP()
 	
-	//appendToFile('MAC_ADDRESSING.TXT','Function is working')
-	
+
 	(*
 	SLONG IP_CLIENT_OPEN (INTEGER LocalPort, CHAR ServerAddress[ ], LONG ServerPort, INTEGER Protocol)
     *)
 
 	
 	
+    }
+    string:
+    {
+
+    
     }
 }
 
@@ -1292,6 +1307,8 @@ data_event[dvLIGHTS]
 {
     online:
     {
+	fnOpenTCPConnect(dvLIGHTS, IPAddress, ATOI(IPPort))
+	//fnOpenTCPConnect(dvLIGHTS, LIGHTING_IP_ADDRESS, LIGHTING_PORT)
 	ON[dvLIGHTS,DEVICE_COMMUNICATING]
     }
     offline:
@@ -1299,7 +1316,9 @@ data_event[dvLIGHTS]
 	OFF[dvLIGHTS,DEVICE_COMMUNICATING]
     }
     onerror:
-    {
+    {	
+	fnOpenTCPConnect(dvLIGHTS, IPAddress, ATOI(IPPort))
+	//fnOpenTCPConnect(dvLIGHTS, LIGHTING_IP_ADDRESS, LIGHTING_PORT)
     }
     string:
     {
@@ -1310,9 +1329,9 @@ data_event[dvLIGHTS]
 	//DL,[1:4],50
 	sFromLightingControl = data.text;			//String from device
 	fnParseLights(sFromLightingControl)
-	nZone = ATOI(mid_string(sFromLightingControl,7,1));	//Get Zone
-	nLevel = ATOI(mid_string(sFromLightingControl,10,3));	//Get Level
-	send_level dvTP_LIGHT, nLevelArray[nZone],(nLevel * 2.55);
+	//nZone = ATOI(mid_string(sFromLightingControl,7,1));	//Get Zone
+	//nLevel = ATOI(mid_string(sFromLightingControl,10,3));	//Get Level
+	//send_level dvTP_LIGHT, nLevelArray[nZone],(nLevel * 2.55);
 	
     }
 
@@ -1348,11 +1367,11 @@ data_event[dvTP]
 {
     STRING:
     {
-	sFromTP = data.text;
 	
-	sToSend = "'10001:1:0,',sFromTP,',',DATE,',',TIME"
+	//sToSend = "'10001:1:0,',sFromTP,',',DATE,',',TIME"
+	//sToSend = "'10001:1:0,',DATE,',',TIME"
 	
-	//appendToFile('MAC_ADDRESSING.TXT',sToSend)
+	
 
     }
     ONLINE:
@@ -1361,6 +1380,22 @@ data_event[dvTP]
     }
     
 }
+custom_event[dvTP,0,1315]//This was such a fucking pain in the ass to figure out
+{
+    sFromTP = custom.text
+}
+
+
+
+BUTTON_EVENT [dvTP,50]
+{
+PUSH:
+{
+SEND_COMMAND dvTP,"'?MAC'" //1001-Read Text
+
+}
+}
+
 
 //SWITCHER BUTTON EVENTS
 //
@@ -1525,7 +1560,16 @@ button_event[dvTP,0]
 	    }
 	    case 105:		// Power Button
 	    {
+		if (nSystemStatus==1)
+		{
+		fnShutdown()
+		//send_command dvTP,'@PPN-Confirm'
+		}
+		else
+		{
+		
 		fnCheckPowerStatus()
+		}
 	    }
 	    case 106:
 	    {
@@ -1792,38 +1836,67 @@ button_event[dvTP_LIGHT,nSceneButtons]
     {
 	local_var integer nZoneLoop
 	local_var integer index
-	nZoneLoop = 1
+	local_var integer waitTime
+	
+	//waitTime = instancedScenes[index].instancedLights[nZoneLoop].fadeTime*100
 	index = GET_LAST(nSceneButtons)
 	//WHILE (nZoneLoop <=4)
-	on[dvTP_LIGHT,nSceneButtons]
+	
 	//WHILE (nZoneLoop <5)
+	
+//Loop it
+(*
+	FOR(nZoneLoop = 1; nZoneLoop <=4; nZoneLoop++)
+	{
+	    send_command dvTP_LIGHT,"'^TXT-10,0,',instancedScenes[index].sceneName"
+	    wait  100
+	    {
+		
+		send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+		send_command dvTP_LIGHT,"'^TXT-10,0,CONFIRMED'"
+	    }
+	}
+*)
+//FOR loop sucks. Let's try a WHILE. This works, but only on a fast enough controller. Waits aren't working right. 
 
-	    
-	    
-	    //FADEDIM,intensity,fadetime,delaytime,[unit:zone]
-	    //This fucking string.
-	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
-	    wait 30
-	    off[dvTP_LIGHT,nSceneButtons]
-	    nZoneLoop = 2
-	    wait 60
-	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
-	    wait 90
-	    on[dvTP_LIGHT,nSceneButtons]
-	    nZoneLoop = 3 
-	    wait 120
-	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
-	    wait 150
-	    off[dvTP_LIGHT,nSceneButtons]
-	    nZoneLoop = 4
-	    wait 180
-	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
-	    on[dvTP_LIGHT,nSceneButtons]
-	    //send_command dvLights,"'FADEDIM,',ITOA(nTensity),',',,',0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
-	    
-    
-	off[dvTP_LIGHT,nSceneButtons]
+	nZoneLoop = 1
+	//send_command dvTP_LIGHT,"'^TXT-10,0,',instancedScenes[index].sceneName"
+	WHILE (nZoneLoop <= 4)
+	{	
+	    //send_command dvTP_LIGHT,"'^TXT-10,0,',instancedScenes[index].sceneName"
+
+		send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+		send_command dvTP_LIGHT,"'^TXT-10,0,CONFIRMED'"
+		nZoneLoop++
+	
+	}
+
+//Non Looping - This works for sure, but let's make it a little more elegant and time efficient.
+(*
 	send_command dvTP_LIGHT,"'^TXT-10,0,',instancedScenes[index].sceneName"
+	
+	//FADEDIM,intensity,fadetime,delaytime,[unit:zone]
+	//This fucking string.
+	    nZoneLoop = 1
+	    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+	    wait 50
+	    {
+		nZoneLoop = 2
+		send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+		wait 50
+		{
+		    nZoneLoop = 3 
+		    send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+		    wait 50
+		    {
+			nZoneLoop = 4
+			send_string dvLIGHTS,"'FADEDIM,',ITOA(instancedScenes[index].instancedLights[nZoneLoop].lightIntensity),',',ITOA(instancedScenes[index].instancedLights[nZoneLoop].fadeTime),',0,[1:',ITOA(nZoneLoop),']',$0d";
+		    }
+		}
+	    }
+	//send_command dvLights,"'FADEDIM,',ITOA(nTensity),',',,',0,[1:',ITOA(GET_LAST(nLowerDimButtons)),']',$0d"; //Use direct set for lights. Simplifies everything.
+*)	
+	
     }
     release:
     {
@@ -1945,8 +2018,20 @@ button_event[VIRTUALKEYPAD,BTNS]	//really no reason to use the btns array here. 
 	switch(button.input.channel)
 	{
 	    case 5:
+	    {
+		cDATE = DATE
+		cTIME = TIME
+		sToSend = "'10001:1:0,',sFromTP,',',cDate,'&',cTime"
+		appendToFile('TEST.txt',sToSend)
+	    }
 	    case 6:
+	    {
+		appendToFile('IDK.txt','Change is everywhere')
+	    }
 	    case 7:
+	    {
+		do_push(dvTP,50)
+	    }
 	    case 8:
 	    {
 		do_push(dvTP,button.input.channel+6)
@@ -2046,7 +2131,9 @@ channel_event[dvLIGHTS,DEVICE_COMMUNICATING]
     }
     OFF:
     {
-	fnInitializeLightConnection()
+	//fnInitializeLightConnection()
+	fnOpenTCPConnect(dvLIGHTS, IPAddress, ATOI(IPPort))
+	//fnOpenTCPConnect(dvLIGHTS, LIGHTING_IP_ADDRESS, LIGHTING_PORT)
     }
 }
 
