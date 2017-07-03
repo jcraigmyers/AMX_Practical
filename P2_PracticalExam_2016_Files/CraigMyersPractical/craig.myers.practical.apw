@@ -166,12 +166,12 @@
 <FilePathName>craig.myers.practical.axs</FilePathName>
 <Comments></Comments>
 </File>
-<File CompileType="Netlinx" Type="Other"><Identifier>IP_ADDRESSING</Identifier>
+<File CompileType="Netlinx" Type="Other"><Identifier>IP_ADDRESSING.TXT</Identifier>
 <FilePathName>IP_ADDRESSING.txt</FilePathName>
 <Comments></Comments>
 <MasterDirectory>\</MasterDirectory>
 </File>
-<File CompileType="Netlinx" Type="Other"><Identifier>MAC_ADDRESSING</Identifier>
+<File CompileType="Netlinx" Type="Other"><Identifier>MAC_ADDRESSING.TXT</Identifier>
 <FilePathName>MAC_ADDRESSING.txt</FilePathName>
 <Comments></Comments>
 <MasterDirectory>\</MasterDirectory>
