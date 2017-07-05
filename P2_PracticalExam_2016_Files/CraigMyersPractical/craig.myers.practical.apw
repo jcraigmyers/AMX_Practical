@@ -125,7 +125,7 @@
 <SysID>0</SysID>
 <TransTCPIP>0.0.0.0</TransTCPIP>
 <TransSerial>COM1,115200,8,None,1,None</TransSerial>
-<TransTCPIPEx>10.0.0.200|1319|1|Master||</TransTCPIPEx>
+<TransTCPIPEx>192.168.1.110|1319|1|3100 Test Bench||</TransTCPIPEx>
 <TransSerialEx>COM3|38400|8|None|1|None||</TransSerialEx>
 <TransUSBEx>NX-3200|PE111cs|210603gx43f0043|00:60:9f:9f:d1:2e||</TransUSBEx>
 <TransVNMEx>10.0.0.1|1|&lt;Default&gt;</TransVNMEx>
@@ -168,11 +168,6 @@
 </File>
 <File CompileType="Netlinx" Type="Other"><Identifier>IP_ADDRESSING.TXT</Identifier>
 <FilePathName>IP_ADDRESSING.txt</FilePathName>
-<Comments></Comments>
-<MasterDirectory>\</MasterDirectory>
-</File>
-<File CompileType="Netlinx" Type="Other"><Identifier>MAC_ADDRESSING.TXT</Identifier>
-<FilePathName>MAC_ADDRESSING.txt</FilePathName>
 <Comments></Comments>
 <MasterDirectory>\</MasterDirectory>
 </File>
